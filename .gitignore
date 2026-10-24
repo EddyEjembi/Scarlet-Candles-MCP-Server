@@ -1,0 +1,7 @@
+.venv/
+.env
+__pycache__/
+.pytest_cache/
+*.pyc
+service-account*.json
+candle_chord-PRD.md

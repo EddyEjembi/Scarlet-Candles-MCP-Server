@@ -1,0 +1,27 @@
+# Render Blueprint. Create the service from this file, or copy the settings in the dashboard.
+# Use one instance only. This app is not safe to run as two processes against the same sheet.
+services:
+  - type: web
+    name: scarlet-candles-mcp
+    runtime: python
+    plan: starter
+    region: frankfurt
+    numInstances: 1
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: BRAND_NAME
+        value: Scarlet Candles
+      - key: LOCK_MINUTES
+        value: "120"
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: SHEET_ID
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: MCP_AUTH_TOKEN
+        sync: false
