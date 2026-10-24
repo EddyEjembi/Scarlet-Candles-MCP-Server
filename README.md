@@ -1,4 +1,4 @@
-# otCandle Chord order tools
+# Candle Chord order tools
 
 Python backend for Scarlet Candles reseller orders. An agent calls seven tools to look up a reseller, list stock, lock stock, quote delivery, create a Paystack payment link, and confirm the payment. Google Sheets holds the data.
 
