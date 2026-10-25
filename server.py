@@ -87,6 +87,7 @@ def _register_tools(mcp: MCPServer) -> None:
     def get_reseller(whatsapp_number: str) -> dict[str, object]:
         """Look up one reseller by WhatsApp number.
 
+        Accept Nigerian numbers as +234…, 234…, or 0… (spaces and dashes are fine).
         Call this before locking stock. Returns reseller_id, name, email, status, and
         lifetime_total when the reseller is registered and active. Returns ok false when
         the number is not registered or the reseller is inactive.

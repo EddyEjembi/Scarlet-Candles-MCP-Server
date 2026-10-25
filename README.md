@@ -26,7 +26,7 @@ Orders: `order_id`, `reseller_id`, `sku`, `qty`, `status`, `locked_until`, `addr
 
 Resellers: `reseller_id`, `name`, `whatsapp_number`, `email`, `status`, `lifetime_total`.
 
-Status moves `LOCKED` to `AWAITING_PAYMENT` to `PAID`. A lock past `locked_until` becomes `EXPIRED` the next time any tool runs, and reserved stock is released. Orders still waiting for payment expire the same way, because they still hold reserved stock. There is no background job.
+Status moves from `LOCKED` to `AWAITING_PAYMENT` to `PAID`. A lock past `locked_until` becomes `EXPIRED` the next time any tool runs, and reserved stock is released. Orders still waiting for payment expire the same way, because they still hold reserved stock. There is no background job.
 
 Writes in this process share one `threading.Lock`. Google Sheets is not transactional. A crash between two cell updates can leave a row half-updated.
 
@@ -39,6 +39,14 @@ The charge is `(goods + delivery) * 100` kobo, currency NGN, reference = order i
 The webhook is a custom route, so the MCP bearer token is not required there.
 
 ## Setup
+
+First, install all required dependencies:
+
+```text
+uv sync
+```
+
+Create environment file:
 
 ```text
 copy .env.example .env
@@ -69,9 +77,14 @@ The server listens on `http://127.0.0.1:8000/mcp`. Callers send `Authorization: 
 
 ```text
 python server.py
+```
 
+Note: For local testing, forward port and place  `https://<forwarded-url>/paystack/webhook` on [Paystack dashboard](https://support.paystack.com/en/articles/2123458#webhook_url).
+
+```text
 python manual_order.py
 ```
+
 
 Open the printed checkout URL and pay with a Paystack TEST card. Pass `--confirm` if you want the script to also call `confirm_payment` while waiting (useful before ngrok is set up).
 

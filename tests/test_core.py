@@ -12,6 +12,8 @@ import pytest
 from core.delivery import quote_delivery
 from core.payments import confirm_payment, create_payment_link, handle_paystack_webhook
 from core.orders import get_order
+from core.phone import normalize_whatsapp
+from core.resellers import get_reseller
 from core.sheets import INVENTORY_TAB, ORDERS_TAB, RESELLERS_TAB, MemorySheetStore, set_store
 from core.stock import list_stock, lock_stock
 from seed import seed_store
@@ -44,6 +46,32 @@ def sheets(monkeypatch: pytest.MonkeyPatch) -> Iterator[MemorySheetStore]:
     set_store(store)
     yield store
     set_store(None)
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("+2348011111111", "+2348011111111"),
+        ("2348011111111", "+2348011111111"),
+        ("08011111111", "+2348011111111"),
+        ("+234 801 111 1111", "+2348011111111"),
+        ("0801-111-1111", "+2348011111111"),
+        ("8011111111", "+2348011111111"),
+    ],
+)
+def test_normalize_whatsapp_accepts_common_forms(raw: str, expected: str) -> None:
+    """Nigerian WhatsApp inputs collapse to +234XXXXXXXXXX."""
+    assert normalize_whatsapp(raw) == expected
+
+
+def test_get_reseller_matches_local_and_international_forms() -> None:
+    """Sheet stores +234…; callers may type 0… or 234… and still match."""
+    for number in ("+2348011111111", "2348011111111", "08011111111"):
+        result = get_reseller(number)
+        assert result["ok"] is True
+        reseller = result["reseller"]
+        assert isinstance(reseller, dict)
+        assert reseller["reseller_id"] == "RSL-001"
 
 
 def test_lock_more_than_available(sheets: MemorySheetStore) -> None:
